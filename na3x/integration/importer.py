@@ -1,7 +1,7 @@
 import json
 from string import Template
-from natrix.integration.integrator import Integrator
-from natrix.integration.request import ImportRequest
+from na3x.integration.integrator import Integrator
+from na3x.integration.request import ImportRequest
 
 
 class Importer(Integrator):

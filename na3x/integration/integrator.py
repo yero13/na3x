@@ -1,6 +1,6 @@
 import abc
 import logging
-from natrix.db.connect import MongoDb
+from na3x.db.connect import MongoDb
 
 
 class Integrator():

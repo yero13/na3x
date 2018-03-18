@@ -1,7 +1,7 @@
 from datetime import date
 from flask.json import JSONEncoder
 from jsondiff import diff
-from natrix.utils.converter import Converter, Types
+from na3x.utils.converter import Converter, Types
 
 
 class ExtJSONEncoder(JSONEncoder):

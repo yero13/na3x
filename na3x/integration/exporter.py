@@ -1,8 +1,8 @@
 import copy
 import json
-from natrix.integration.integrator import Integrator
-from natrix.integration.request import ExportRequest
-from natrix.utils.cfg import CfgUtils
+from na3x.integration.integrator import Integrator
+from na3x.integration.request import ExportRequest
+from na3x.utils.cfg import CfgUtils
 
 
 class Exporter(Integrator):

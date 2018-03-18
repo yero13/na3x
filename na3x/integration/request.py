@@ -5,7 +5,7 @@ import jsonschema
 import requests
 from jsonschema import validate
 from requests.auth import HTTPBasicAuth
-from natrix.utils.converter import Types, Converter
+from na3x.utils.converter import Types, Converter
 
 
 class Field:

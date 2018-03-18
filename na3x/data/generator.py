@@ -1,9 +1,9 @@
 import json
 import logging
-from natrix.integration.exporter import Exporter
-from natrix.integration.importer import Importer
-from natrix.transformation.transformer import Transformer
-from natrix.utils.cfg import CfgUtils
+from na3x.integration.exporter import Exporter
+from na3x.integration.importer import Importer
+from na3x.transformation.transformer import Transformer
+from na3x.utils.cfg import CfgUtils
 
 
 class Generator():

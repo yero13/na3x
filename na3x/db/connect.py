@@ -1,6 +1,6 @@
 from pymongo import MongoClient
 import logging
-from natrix.cfg import natrix_cfg, NATRIX_DB
+from na3x.cfg import natrix_cfg, NATRIX_DB
 
 
 class MongoDb:

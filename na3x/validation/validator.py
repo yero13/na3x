@@ -1,8 +1,8 @@
 import logging
-from natrix.utils.aggregator import Aggregator
-from natrix.utils.object import obj_for_name
-from natrix.db.data import Accessor, AccessParams
-from natrix.utils.converter import Converter
+from na3x.utils.aggregator import Aggregator
+from na3x.utils.object import obj_for_name
+from na3x.db.data import Accessor, AccessParams
+from na3x.utils.converter import Converter
 
 
 class Validator:
