@@ -1,6 +1,8 @@
 import json
 
+
 natrix_cfg = {}
+
 
 NATRIX_DB = 'db'
 NATRIX_TRIGGERS = 'triggers'
@@ -15,6 +17,7 @@ def init(cfg):
         natrix_cfg[NATRIX_TRIGGERS] = json.load(triggers_cfg_file, strict=False)
     with open(cfg[NATRIX_ENV]) as env_cfg_file:
         natrix_cfg[NATRIX_ENV] = json.load(env_cfg_file, strict=False)
+
 
 CFG_ENV_TEST = 'test'
 CFG_ENV_PROD = 'prod'
