@@ -1,6 +1,6 @@
 from pymongo import MongoClient
 import logging
-from na3x.cfg import natrix_cfg, NATRIX_DB
+from na3x.cfg import na3x_cfg, NA3X_DB
 
 
 class MongoDb:
@@ -12,7 +12,7 @@ class MongoDb:
 
     def __init__(self, cfg_db):
         self.__logger = logging.getLogger(__class__.__name__)
-        cfg = natrix_cfg[NATRIX_DB][cfg_db]
+        cfg = na3x_cfg[NA3X_DB][cfg_db]
         self.__connection = MongoClient(
             'mongodb://{}:{}@{}:{:d}/'.format(cfg[MongoDb.__CFG_PARAM_MONGO_USER], cfg[MongoDb.__CFG_PARAM_MONGO_PSWD],
                                               cfg[MongoDb.__CFG_PARAM_MONGO_HOST],

@@ -2,7 +2,7 @@ import abc
 import logging
 from na3x.db.connect import MongoDb
 from na3x.utils.object import obj_for_name
-from na3x.cfg import natrix_cfg, NATRIX_TRIGGERS, get_env_params
+from na3x.cfg import na3x_cfg, NA3X_TRIGGERS, get_env_params
 
 
 class CRUD:
@@ -42,7 +42,7 @@ class Trigger:
 
     @staticmethod
     def factory(db, collection, action):
-        triggers_cfg = natrix_cfg[NATRIX_TRIGGERS]
+        triggers_cfg = na3x_cfg[NA3X_TRIGGERS]
         if (collection in triggers_cfg) and (action in triggers_cfg[collection]):
             return obj_for_name(triggers_cfg[collection][action])(db, collection)
         else:
