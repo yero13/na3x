@@ -3,7 +3,7 @@ from setuptools import find_packages
 
 setup(name='natrix',
       version='0.1',
-      description='Natrix framework',
+      description='Natrix data transformation and integration framework',
       author='Roman Yepifanov',
       url='https://github.com/yero13/natrix',
       license='MIT',
