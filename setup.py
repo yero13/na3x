@@ -1,19 +1,19 @@
 from distutils.core import setup
 from setuptools import find_packages
 
-setup(name='natrix',
+setup(name='na3x',
       version='0.1',
-      description='Natrix data transformation and integration framework',
+      description='Na3x data transformation and integration framework',
       author='Roman Yepifanov',
-      url='https://github.com/yero13/natrix',
+      url='https://github.com/yero13/na3x',
       license='MIT',
       classifiers=[
           'Development Status :: 3 - Alpha',
           'Environment :: Console',
           'Programming Language :: Python :: 3.6'],
       packages=find_packages(),
-      package_data = {'natrix': ['.LICENSE']},
-      package_dir={'.':'natrix'},
+      package_data = {'na3x': ['.LICENSE']},
+      package_dir={'.':'na3x'},
       python_requires= '~=3.6',
       install_requires=['pandas', 'jsonschema', 'requests', 'pymongo', 'jsondiff']
       )
