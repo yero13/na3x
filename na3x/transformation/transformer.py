@@ -42,6 +42,9 @@ class TransformationSet:
 
 
 class Transformation:
+    """
+    Base class for transformations
+    """
     __CFG_KEY_TRANSFORMATION = 'transformation'
     __CFG_KEY_TRANSFORMATION_CLASS = 'class'
     CFG_KEY_TRANSFORMATION_CFG = 'cfg'
@@ -57,10 +60,38 @@ class Transformation:
 
     @staticmethod
     def factory(cfg, src_db, dest_db):
+        """
+        Instantiate Transformation
+        :param cfg: transformation configuration
+			"class": "na3x.transformation.transformer.Col2XTransformation", <Transformation class>
+				"cfg": {
+					"src.db.load": {
+						"src": "sprint.backlog_links" <Collection(s) to be loaded>
+					},
+					"transform": {
+						"func": "ext.transformers.gantt_links" <transformer function>
+					},
+					"dest.db.cleanup": {
+						"target": "baseline.gantt_links" <Collection to be cleaned during transformation (usually the same as destination)>
+					},
+					"dest.db.save": {
+						"dest": "baseline.gantt_links" <Destination collection>
+					}
+				}
+        :param src_db: source db for transformation
+        :param dest_db: destination db for transformation
+        :return: Transformation instance
+        """
         return obj_for_name(cfg[Transformation.__CFG_KEY_TRANSFORMATION_CLASS])(
             cfg[Transformation.CFG_KEY_TRANSFORMATION_CFG], src_db, dest_db)
 
     def __init__(self, cfg, src_db, dest_db):
+        """
+        Constructor
+        :param cfg: transformation configuration
+        :param src_db: source db for transformation
+        :param dest_db: destination db for transformation
+        """
         self.__cfg = cfg
         self._logger = logging.getLogger(__class__.__name__)
         self._src_db = src_db
@@ -76,6 +107,10 @@ class Transformation:
 
     @abc.abstractmethod
     def _load(self, cfg):
+        """
+        Loads data for transformation
+        :param cfg: transformation configuration
+        """
         return NotImplemented
 
     def __save(self, cfg):
@@ -90,6 +125,10 @@ class Transformation:
         self.__res = obj_for_name(func)(self.__src, args)
 
     def perform(self, cfg):
+        """
+        Performs transformation according to configuration
+        :param cfg: transformation configuration
+        """
         self.__src = self._load(cfg[Transformation.__CFG_KEY_LOAD])
         self.__transform(cfg[Transformation.__CFG_KEY_TRANSFORM])
         self.__cleanup(cfg[Transformation.__CFG_KEY_CLEANUP])
@@ -97,6 +136,9 @@ class Transformation:
 
 
 class Doc2XTransformation(Transformation):
+    """
+    Transformation class with single document (object) source
+    """
     def _load(self, cfg):
         return Accessor.factory(self._src_db).get(
             {AccessParams.KEY_COLLECTION: cfg[Transformation._CFG_KEY_LOAD_SRC],
@@ -104,6 +146,9 @@ class Doc2XTransformation(Transformation):
 
 
 class Col2XTransformation(Transformation):
+    """
+    Transformation class with single collection source
+    """
     def _load(self, cfg):
         return Accessor.factory(self._src_db).get(
             {AccessParams.KEY_COLLECTION: cfg[Transformation._CFG_KEY_LOAD_SRC],
@@ -111,6 +156,9 @@ class Col2XTransformation(Transformation):
 
 
 class MultiCol2XTransformation(Transformation):
+    """
+    Transformation class with multiple collections source
+    """
     def _load(self, cfg):
         sources = cfg[Transformation._CFG_KEY_LOAD_SRC]
         src_data = {}
@@ -121,6 +169,9 @@ class MultiCol2XTransformation(Transformation):
 
 
 class MultiDoc2XTransformation(Transformation):
+    """
+    Transformation class with multiple documents (objects) source
+    """
     def _load(self, cfg):
         sources = cfg[Transformation._CFG_KEY_LOAD_SRC]
         src_data = {}
@@ -131,6 +182,9 @@ class MultiDoc2XTransformation(Transformation):
 
 
 class MultiColDoc2XTransformation(Transformation):
+    """
+    Transformation class with multiple documents and collections source
+    """
     _CFG_KEY_LOAD_SRC_COLS = 'src.cols'
     _CFG_KEY_LOAD_SRC_DOCS = 'src.docs'
 
@@ -146,6 +200,11 @@ class MultiColDoc2XTransformation(Transformation):
 
 
 def transformer(func):
+    """
+    @transformer decorator function
+    :param func: transformer function
+    :return: transformer function result
+    """
     def transformer_wrapper(input, params):
         return func(input, **params)
     return transformer_wrapper
@@ -153,6 +212,12 @@ def transformer(func):
 
 @transformer
 def group_singles2array(input, **params):
+    """
+    Creates array of strings or ints from objects' fields
+    :param input: list of objects
+    :param params:
+    :return: list
+    """
     PARAM_FIELD_KEY = 'field.key'
     PARAM_FIELD_ARRAY = 'field.array'
     PARAM_FIELD_SINGLE = 'field.single'
@@ -181,6 +246,12 @@ def group_singles2array(input, **params):
 
 @transformer
 def ungroup_array2singles(input, **params):
+    """
+    Creates list of objects from array of singles
+    :param input: list of strings or ints
+    :param params:
+    :return:
+    """
     PARAM_FIELD_KEY = 'field.key'
     PARAM_FIELD_ARRAY = 'field.array'
     PARAM_FIELD_SINGLE = 'field.single'
@@ -198,6 +269,12 @@ def ungroup_array2singles(input, **params):
 
 @transformer
 def filter_set(input, **params):
+    """
+    Apply WHERE filter to input dataset
+    :param input:
+    :param params:
+    :return: filtered data
+    """
     PARAM_WHERE = 'where'
 
     return Converter.df2list(pd.DataFrame.from_records(input).query(params.get(PARAM_WHERE)))
@@ -205,6 +282,12 @@ def filter_set(input, **params):
 
 @transformer
 def sort_set(input, **params):
+    """
+    Apply sorting to input dataset
+    :param input:
+    :param params:
+    :return: sorted data
+    """
     PARAM_SORT_FIELD = 'sort.field'
     PARAM_SORT_ORDER = 'sort.order'
 
@@ -220,6 +303,12 @@ def sort_set(input, **params):
 
 @transformer
 def copy(input, **params):
+    """
+    Copies input or input's selected fields
+    :param input:
+    :param params:
+    :return: input
+    """
     PARAM_FIELDS = 'fields'
 
     def filter_fields(obj, fields):
@@ -242,6 +331,12 @@ def copy(input, **params):
 
 @transformer
 def regexp(input, **params):
+    """
+    Parses input according to pattern
+    :param input:
+    :param params:
+    :return:
+    """
     PARAM_FIELD_TO_PARSE = 'input.field'
     PARAM_PATTERN = 'pattern'
     PARAM_OUTPUT = 'output'
@@ -264,6 +359,12 @@ def regexp(input, **params):
 
 @transformer
 def format(input, **params):
+    """
+    Appends string formatted value to result
+    :param input:
+    :param params:
+    :return:
+    """
     PARAM_FORMAT_STRING = 'format.string'
     PARAM_FORMAT_INPUT = 'format.input'
     PARAM_RESULT_FIELD = 'result.field'
@@ -283,6 +384,12 @@ def format(input, **params):
 
 @transformer
 def left_join(input, **params):
+    """
+    Left join transformation
+    :param input:
+    :param params:
+    :return:
+    """
     PARAM_COL_RIGHT = 'col.right'
     PARAM_COL_LEFT = 'col.left'
     PARAM_FIELD_JOIN = 'field.join'
@@ -296,6 +403,12 @@ def left_join(input, **params):
 
 @transformer
 def union(input, **params):
+    """
+    Union transformation
+    :param input:
+    :param params:
+    :return:
+    """
     res = []
     for col in input:
         res.extend(input[col])
@@ -304,6 +417,12 @@ def union(input, **params):
 
 @transformer
 def update_doc(input, **params):
+    """
+    Updates document with value from another document
+    :param input:
+    :param params:
+    :return:
+    """
     PARAM_SOURCE = 'source'
     SOURCE_COL = 'src.col'
     SOURCE_FIELD = 'src.field'
@@ -317,6 +436,12 @@ def update_doc(input, **params):
 
 @transformer
 def update_col(input, **params):
+    """
+    Updates document with value from another document/collection/constant
+    :param input:
+    :param params:
+    :return:
+    """
     PARAM_TARGET = 'target'
     PARAM_UPDATE = 'update'
     SOURCE_TYPE = 'src.type'
@@ -340,6 +465,12 @@ def update_col(input, **params):
 
 @transformer
 def replace(input, **params):
+    """
+    Replaces field value
+    :param input:
+    :param params:
+    :return:
+    """
     PARAM_REPLACE_LIST = 'replace'
     REPLACE_FIELD = 'field'
     REPLACE_FIND_VALUE = 'value.to_find'
@@ -355,6 +486,12 @@ def replace(input, **params):
 
 @transformer
 def rename_fields(input, **params):
+    """
+    Renames field in collection
+    :param input:
+    :param params:
+    :return:
+    """
     PARAM_RENAME_LIST = 'rename'
     RENAME_SRC_FIELD = 'src.field'
     RENAME_DEST_FIELD = 'dest.field'

@@ -5,6 +5,9 @@ from na3x.utils.converter import Converter, Types
 
 
 class ExtJSONEncoder(JSONEncoder):
+    """
+    Custom JSON encoder for Flask REST API
+    """
     def default(self, obj):
         try:
             if isinstance(obj, date):
@@ -21,9 +24,18 @@ class ExtJSONEncoder(JSONEncoder):
 
 
 class JSONUtils():
+    """
+    JSON utils
+    """
     DIFF_DELETE = '$delete'
 
     def diff(a, b):
+        """
+        Compares JSON objects
+        :param a:
+        :param b:
+        :return: difference object a vs b
+        """
         delta = diff(a, b)
         if not a:
             return delta

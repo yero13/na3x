@@ -2,8 +2,19 @@ import pandas as pd
 
 
 class Aggregator:
+    """
+    Aggregator
+    """
     @staticmethod
     def agg_multi_func(values, agg_field, agg_funcs, group_by=None):
+        """
+        Aggregates several functions
+        :param values: list of objects (dict)
+        :param agg_field: target field to calculate aggregates
+        :param agg_funcs: list of aggregate functions
+        :param group_by: field used to determine group
+        :return: dict {agg_func0: value, agg_func1: agg_value, ...}
+        """
         if len(values) == 0:
             return None
         else:
@@ -25,6 +36,14 @@ class Aggregator:
 
     @staticmethod
     def agg_single_func(values, agg_field, agg_func, group_by=None):
+        """
+        Aggregates single function
+        :param values: list of objects (dict)
+        :param agg_field: target field to calculate aggregate
+        :param agg_func: aggregate function
+        :param group_by: field used to determine group
+        :return: aggregated value
+        """
         if len(values) == 0:
             return None
         else:

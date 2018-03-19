@@ -6,6 +6,9 @@ from na3x.utils.converter import Converter
 
 
 class Validator:
+    """
+    Validates input object according configuration of validation checks
+    """
     __CFG_KEY_CHECKS = 'checks'
 
     def __init__(self, cfg):
@@ -13,6 +16,12 @@ class Validator:
         self.__logger = logging.getLogger(__class__.__name__)
 
     def validate(self, obj_to_validate, is_substitute=True):
+        """
+        Performs validation
+        :param obj_to_validate:
+        :param is_substitute:
+        :return: list of validation messages or None
+        """
         res = []
         for check in self.__cfg[Validator.__CFG_KEY_CHECKS]:
             self.__logger.info('Performing {} validation against {}'.format(check, obj_to_validate))
@@ -26,6 +35,38 @@ class Validator:
 
 
 class Check:
+    """
+    Performs validation check according to configuration
+    Configuration example:
+		"assignment.expertise.conflict": {
+			"constraint": {
+				"func": "na3x.validation.validator.extract", <function how to get constraint value>
+				"params": {
+					"db": "db_scrum_api",
+					"match": ["key"],
+					"collection": "sprint.backlog",
+					"field": "components"
+				},
+				"default": []
+			},
+			"to_validate": {
+				"func": "na3x.validation.validator.extract", <function how to get validated value>
+				"params": {
+					"db": "db_scrum_api",
+					"match": ["group"],
+					"collection": "project.team",
+					"field": "components"
+				},
+				"default": []
+			},
+			"compare": {
+				"func": "na3x.validation.validator.no_intersection", <function how to compare constraint vs validated>
+				"violation": { <violation message>
+					"severity": "warning",
+					"message": "Task requires {} component(s) expertise"
+				}
+			}
+    """
     CFG_KEY_VIOLATION_SEVERITY = 'severity'
     CFG_KEY_VIOLATION_MSG = 'message'
     __CFG_KEY_TO_VALIDATE = 'to_validate'
@@ -75,18 +116,34 @@ class Check:
             return cfg[Check.__CFG_KEY_DEFAULT]
 
     def validate(self, input, is_substitute): # ToDo: apply 'no substitute' for initial load validations
+        """
+        Performs validation
+        :param input: object to validate
+        :param is_substitute: will be used for what-if in the future
+        :return: validation result if violated or None
+        """
         constraint = self.__get_constraint(input)
         to_validate = self.__get_to_validate(input)
         return self.__compare(to_validate, constraint)
 
 
 def getter(func):
+    """
+    @getter decorator function
+    :param func: getter function
+    :return: getter function result
+    """
     def getter_wrapper(input, params):
         return func(input, **params)
     return getter_wrapper
 
 
 def comparator(func):
+    """
+    @comparator decorator function
+    :param func: comparator function
+    :return: comparator function result
+    """
     def comparator_wrapper(to_validate, constraint, violation_cfg):
         return func(to_validate, constraint, violation_cfg)
     return comparator_wrapper
@@ -122,6 +179,12 @@ def __substitute(input, dataset, cfg):
 
 @getter
 def const(input, **params):
+    """
+    Return constant value
+    :param input:
+    :param params:
+    :return:
+    """
     PARAM_CONSTANT_VALUE = 'value'
 
     return params.get(PARAM_CONSTANT_VALUE)
@@ -129,12 +192,24 @@ def const(input, **params):
 
 @getter
 def return_input(input, **params):
+    """
+    Returns input value
+    :param input:
+    :param params:
+    :return:
+    """
     PARAM_FIELD = 'field'
 
     return input[params.get(PARAM_FIELD)]
 
 @getter
 def extract(input, **params):
+    """
+    Extract field value from document
+    :param input:
+    :param params:
+    :return:
+    """
     EXTRACT_FIELD = 'field'
 
     extract_params = params
@@ -144,6 +219,12 @@ def extract(input, **params):
 
 @getter
 def aggregate(input, **params):
+    """
+    Returns aggregate
+    :param input:
+    :param params:
+    :return:
+    """
     PARAM_CFG_EXTRACT = 'extract'
     PARAM_CFG_SUBSTITUTE = 'substitute'
     PARAM_CFG_AGGREGATE = 'aggregate'
@@ -162,6 +243,13 @@ def aggregate(input, **params):
 
 @comparator
 def limit_exceed(to_validate, constraint, violation_cfg):
+    """
+    Compares 2 values and returns violation message if validated value bigger than constraint
+    :param to_validate:
+    :param constraint:
+    :param violation_cfg:
+    :return:
+    """
     if to_validate > constraint:
         violation_cfg[Check.CFG_KEY_VIOLATION_MSG] = violation_cfg[Check.CFG_KEY_VIOLATION_MSG].format(constraint)
         return violation_cfg
@@ -171,6 +259,13 @@ def limit_exceed(to_validate, constraint, violation_cfg):
 
 @comparator
 def no_intersection(to_validate, constraint, violation_cfg):
+    """
+    Returns violation message if validated and constraint sets have no intersection
+    :param to_validate:
+    :param constraint:
+    :param violation_cfg:
+    :return:
+    """
     if len(constraint) == 0 or len(set(constraint).intersection(to_validate)) > 0:
         return None
     else:

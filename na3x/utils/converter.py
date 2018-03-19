@@ -15,6 +15,12 @@ class Types:
 class Converter:
     @staticmethod
     def convert(input, type):
+        """
+        Converts input value to request type
+        :param input: input value
+        :param type: type to cast
+        :return: converted value
+        """
         try:
             if not input:
                 if type == Types.TYPE_STRING:
@@ -48,10 +54,20 @@ class Converter:
 
     @staticmethod
     def datetime2str(input):
+        """
+        Converts datetime into string
+        :param input: datetime
+        :return: string
+        """
         return input.strftime('%Y-%m-%d %H:%M')
 
     @staticmethod
     def df2list(df):
+        """
+        Converts pandas.DataFrame values into list
+        :param df: pandas.DataFrame
+        :return: list
+        """
         for column in df:
             df[column] = df[column].astype(object).where(df[column].notnull(), None)
         return df.to_dict(orient='records')

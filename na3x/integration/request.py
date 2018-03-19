@@ -9,14 +9,16 @@ from na3x.utils.converter import Types, Converter
 
 
 class Field:
-    FIELD_KEY = 'key'
-    FIELD_EXT_ID = 'ext_id'
-    FIELD_TYPE = 'type'
-    FIELD_SUBITEMS = 'fields'
-    FIELD_EXPLICIT = 'explicit'
-    FIELD_OPTIONAL = 'optional'
-    FIELD_MATCH = 'match'
-
+    """
+    Parser for JSON response
+    """
+    FIELD_KEY = 'key' # field key
+    FIELD_EXT_ID = 'ext_id' # external id
+    FIELD_TYPE = 'type' # field type
+    FIELD_SUBITEMS = 'fields' # sub-fields
+    FIELD_EXPLICIT = 'explicit' # field to be included to target as object with subfields / sub-fields to be included to result
+    FIELD_OPTIONAL = 'optional' # field is optional
+    FIELD_MATCH = 'match' # field match JSON schema
 
     @staticmethod
     def is_complex_type(type):
@@ -34,6 +36,13 @@ class Field:
 
     @staticmethod
     def parse_field(data, field_cfg, target, is_optional=False):
+        """
+        Recursively parses response according to configuration
+        :param data: response or its part
+        :param field_cfg: field configuration
+        :param target: target object for parsed data
+        :param is_optional: optional sign
+        """
         field_type = field_cfg[Field.FIELD_TYPE]
         field_key = field_cfg[Field.FIELD_KEY] if Field.FIELD_KEY in field_cfg else None
         field_ext_id = field_cfg[Field.FIELD_EXT_ID] if Field.FIELD_EXT_ID in field_cfg else field_key
@@ -91,11 +100,20 @@ class Field:
 
 
 class Request:
+    """
+    Base class for REST API requests wrappers
+    """
     _CFG_KEY_REQUEST = 'request'
     _CFG_KEY_REQUEST_URL = 'url'
     _CFG_KEY_REQUEST_DATA = 'data'
 
     def __init__(self, cfg, login, pswd):
+        """
+        Constructor
+        :param cfg: request configuration, should consist of request description (url and parameters) and optional response
+        :param login:
+        :param pswd:
+        """
         self._logger = logging.getLogger(__class__.__name__)
         self._login = login
         self._pswd = pswd
@@ -104,17 +122,32 @@ class Request:
 
     @abc.abstractmethod
     def result(self):
+        """
+        Performs request and returns execution result
+        :return: request execution result
+        """
         return NotImplemented
 
 
 class ExportRequest(Request):
+    """
+    Base class for POST, PUT, DELETE requests
+    """
     TYPE_SET_FIELD_VALUE = 'set_field_value'
     TYPE_CREATE_ENTITY = 'create_entity'
     TYPE_DELETE_ENTITY = 'delete_entity'
     TYPE_CREATE_RELATION = 'create_relation'
 
     @staticmethod
-    def factory(cfg, login, pswd, request_type, mappings=None):
+    def factory(cfg, login, pswd, request_type):
+        """
+        Instantiate ExportRequest
+        :param cfg: request configuration, should consist of request description (url and optional parameters)
+        :param login:
+        :param pswd:
+        :param request_type: TYPE_SET_FIELD_VALUE || TYPE_CREATE_ENTITY || TYPE_DELETE_ENTITY || TYPE_CREATE_RELATION
+        :return: ExportRequest instance
+        """
         if request_type == ExportRequest.TYPE_SET_FIELD_VALUE:
             return SetFieldValueRequest(cfg, login, pswd)
         elif request_type == ExportRequest.TYPE_CREATE_ENTITY:
@@ -126,12 +159,22 @@ class ExportRequest(Request):
         else:
             raise NotImplementedError('Not supported request type - {}'.format(request_type))
 
-    def __init__(self, cfg, login, pswd, mappings=None):
+    def __init__(self, cfg, login, pswd):
+        """
+        Constructor
+        :param cfg: request configuration, should consist of request description (url and optional parameters)
+        :param login:
+        :param pswd:
+        """
         Request.__init__(self, cfg, login, pswd)
         self.__result = self._perform_request()
 
     @abc.abstractmethod
     def _perform_request(self):
+        """
+        Performs request
+        :return: response.content or None
+        """
         return NotImplemented
 
     @property
@@ -140,6 +183,9 @@ class ExportRequest(Request):
 
 
 class CreateEntityRequest(ExportRequest):
+    """
+    Wrapper for POST request that returns result
+    """
     def _perform_request(self):
         request_url = self._request_cfg[Request._CFG_KEY_REQUEST_URL]
         request_data = self._request_cfg[
@@ -156,6 +202,9 @@ class CreateEntityRequest(ExportRequest):
 
 
 class CreateRelationRequest(ExportRequest):
+    """
+    Wrapper for POST request
+    """
     def _perform_request(self):
         request_url = self._request_cfg[Request._CFG_KEY_REQUEST_URL]
         request_data = self._request_cfg[
@@ -171,6 +220,9 @@ class CreateRelationRequest(ExportRequest):
 
 
 class DeleteEntityRequest(ExportRequest):
+    """
+    Wrapper for DELETE request
+    """
     def _perform_request(self):
         request_url = self._request_cfg[Request._CFG_KEY_REQUEST_URL]
         request_data = self._request_cfg[
@@ -185,6 +237,9 @@ class DeleteEntityRequest(ExportRequest):
 
 
 class SetFieldValueRequest(ExportRequest):
+    """
+    Wrapper for PUT request
+    """
     def _perform_request(self):
         request_url = self._request_cfg[Request._CFG_KEY_REQUEST_URL]
         request_data = self._request_cfg[
@@ -201,9 +256,8 @@ class SetFieldValueRequest(ExportRequest):
 
 class ImportRequest(Request):
     """
-    Requests data from Jira. Parses response data accordingly to given rules
+    Base class for GET requests
     """
-
     __CFG_KEY_PARAM_TOTAL = 'total'
     __CFG_KEY_PARAM_START_AT = 'startAt'
     __CFG_KEY_PARAM_MAX_RESULTS = 'maxResults'
@@ -216,6 +270,14 @@ class ImportRequest(Request):
 
     @staticmethod
     def factory(cfg, login, pswd, request_type):
+        """
+        Instantiate ImportRequest
+        :param cfg: request configuration, should consist of request description (url and parameters) and response for parsing result
+        :param login:
+        :param pswd:
+        :param request_type: TYPE_GET_SINGLE_OBJECT or TYPE_GET_LIST = 'list'
+        :return: ImportRequest instance
+        """
         if request_type == ImportRequest.TYPE_GET_LIST:
             return ListImportRequest(cfg, login, pswd)
         elif request_type == ImportRequest.TYPE_GET_SINGLE_OBJECT:
@@ -224,6 +286,13 @@ class ImportRequest(Request):
             raise NotImplementedError('Not supported request type - {}'.format(request_type))
 
     def __init__(self, cfg, login, pswd, request_type):
+        """
+        Constructor
+        :param cfg: request configuration
+        :param login:
+        :param pswd:
+        :param request_type: TYPE_GET_SINGLE_OBJECT or TYPE_GET_LIST = 'list'
+        """
         Request.__init__(self, cfg, login, pswd)
         self._response_cfg = self._cfg[ImportRequest.__CFG_KEY_RESPONSE]
         self._content_root = self._response_cfg[
@@ -238,10 +307,18 @@ class ImportRequest(Request):
 
     @property
     def result(self):
+        """
+        Returns request result
+        :return:  request result (dict or list)
+        """
         return self._get_result()
 
     @abc.abstractmethod
     def _get_result(self):
+        """
+        Getter for result
+        :return: parsed response
+        """
         return NotImplemented
 
     def __perform_single_object_request(self):
@@ -269,6 +346,10 @@ class ImportRequest(Request):
             Request._CFG_KEY_REQUEST_DATA] if Request._CFG_KEY_REQUEST_DATA in self._request_cfg else None
 
     def _perform_request(self):
+        """
+        Performs GET request
+        :return: JSON response
+        """
         request_url = self._request_cfg[Request._CFG_KEY_REQUEST_URL]
         request_data = self._request_cfg[
             Request._CFG_KEY_REQUEST_DATA] if Request._CFG_KEY_REQUEST_DATA in self._request_cfg else None
@@ -285,15 +366,36 @@ class ImportRequest(Request):
     @abc.abstractmethod
     def _parse_response(self, response):
         """
-        Parses response into out_data
+        Parses response according to configuration
         :param response: JSON response
-        :param out_data: dictionary
-        :return: out_data
+        :return: parsed response - dict or list
         """
         return NotImplemented
 
 
 class SingleObjectImportRequest(ImportRequest):
+    """
+    Wrapper for GET request that returns single object
+    Example of configuration (parameters should be substituted)
+	    "request": {
+		    "url": "$url/rest/agile/1.0/sprint/$sprint"
+	    },
+	    "response": {
+		    "noname": "True",
+		    "type": "object",
+		    "fields": {
+			    "name": {
+				    "key": "name",
+				    "type": "string"
+			    },
+                ...
+			    "goal": {
+				    "key": "goal",
+				    "type": "string"
+			    }
+		    }
+	    }
+    """
     def __init__(self, cfg, login, pswd):
         self.__response_values = {}
         ImportRequest.__init__(self, cfg, login, pswd, ImportRequest.TYPE_GET_SINGLE_OBJECT)
@@ -306,7 +408,35 @@ class SingleObjectImportRequest(ImportRequest):
 
 
 class ListImportRequest(ImportRequest):
-    def __init__(self, cfg, login, pswd, mappings=None):
+    """
+    Wrapper for GET request that returns list of objects
+    Example of configuration (parameters should be substituted)
+    	"request": {
+	    	"url": "$url/rest/api/2/search",
+		    "data": {
+			    "jql": "sprint = $sprint",
+	    		"maxResults": 50,
+		    	"startAt": 0
+		    }
+	    },
+	    "response": {
+		    "content-root": "issues",
+		    "issues": {
+			    "noname": true,
+			    "type": "array",
+			    "fields": {
+				    "root": {
+					    "type": "object",
+					    "explicit": true,
+					    "noname": true,
+					    "fields": {
+						    "key": {
+							    "key": "key",
+							    "type": "string"
+						    },
+                            ...
+    """
+    def __init__(self, cfg, login, pswd):
         self.__response_values = []
         ImportRequest.__init__(self, cfg, login, pswd, ImportRequest.TYPE_GET_LIST)
 
