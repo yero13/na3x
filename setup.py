@@ -3,7 +3,7 @@ from setuptools import find_packages
 
 setup(name='na3x',
       version='0.1.4',
-      description='Na3x data transformation and integration framework',
+      description='na3x data transformation and integration framework',
       author='Roman Yepifanov',
       url='https://github.com/yero13/na3x',
       license='MIT',
