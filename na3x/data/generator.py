@@ -7,6 +7,9 @@ from na3x.utils.cfg import CfgUtils
 
 
 class Generator():
+    """
+    Performs sequence of export/imports operations in order to generate set of consistent data
+    """
     __CFG_KEY_STEPS = 'steps'
     __CFG_KEY_STEP_TYPE = 'type'
     __CFG_STEP_TYPE_EXPORT = 'jira.export'

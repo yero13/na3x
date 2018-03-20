@@ -2,7 +2,7 @@ from distutils.core import setup
 from setuptools import find_packages
 
 setup(name='na3x',
-      version='0.1.3',
+      version='0.1.4',
       description='Na3x data transformation and integration framework',
       author='Roman Yepifanov',
       url='https://github.com/yero13/na3x',
@@ -15,5 +15,5 @@ setup(name='na3x',
       package_data = {'na3x': ['.LICENSE']},
       package_dir={'.':'na3x'},
       python_requires= '~=3.6',
-      install_requires=['pandas', 'jsonschema', 'requests', 'pymongo', 'jsondiff']
+      install_requires=['pandas', 'jsonschema', 'requests', 'pymongo', 'jsondiff', 'flask']
       )

@@ -6,6 +6,27 @@ from na3x.utils.cfg import CfgUtils
 
 
 class Exporter(Integrator):
+    """
+    Performs bulk export according to configuration
+	"mapping": {
+		"url": "$jira_url" <mappings used in export request, variables should be defined in env.json>
+	},
+	"requests": {
+		"set_search_label": { <request id>
+			"cfg": "./cfg/jira/jira-set-issue-field.json", <request configuration file>
+			"type": "set_field_value", <request type - Export.TYPE_SET_FIELD_VALUE, TYPE_CREATE_ENTITY, TYPE_DELETE_ENTITY, TYPE_CREATE_RELATION>
+			"src.collection": "sprint.assignments_search_labels", <collection with source data for export>
+			"static_mapping": { <static mappings applied, variables will be taken from env.json>
+				"field": "$field_agilego_search"
+			},
+			"dynamic_mapping": { <dynamic mappings applied, variables will be taken from src.collection>
+				"key": "key",
+				"value": "label"
+			}
+		}
+	},
+	"db": "$db_jira_export" <db to get exported data>
+    """
     __CFG_KEY_SRC_COLLECTION = 'src.collection'
     __CFG_KEY_STATIC_MAPPING = 'static_mapping'
     __CFG_KEY_DYNAMIC_MAPPING = 'dynamic_mapping'

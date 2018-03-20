@@ -5,6 +5,23 @@ from na3x.integration.request import ImportRequest
 
 
 class Importer(Integrator):
+    """
+    Performs bulk import according to configuration
+	"mapping": { <mappings used in import request, variables should be defined in env.json>
+		"url": "$jira_url",
+		"project": "$scrum_project",
+		"sprint": "$scrum_sprint",
+		"field_agilego_tech": "$field_agilego_tech"
+	},
+	"requests": {
+		"components": { <request id>
+			"cfg": "./cfg/jira/jira-components-request.json", <request configuration file>
+			"type": "list", <request type - ImportRequest.TYPE_GET_SINGLE_OBJECT  or TYPE_GET_LIST>
+			"dest": "components" <destination collection to store imported data>
+		},
+        ...
+    "db": "$db_jira_import" <db to store imported data>
+    """
     __CFG_KEY_REQUEST_DEST = 'dest'
 
     def _process_request(self, request_id, request_type, request_cfg_file):
