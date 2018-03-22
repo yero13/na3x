@@ -40,12 +40,12 @@ class Converter:
                 if isinstance(input, datetime.date):
                     return input
                 else:
-                    return datetime.datetime.strptime(input, '%Y-%m-%d')
+                    return datetime.datetime.strptime(input[0:10], '%Y-%m-%d')
             elif type == Types.TYPE_DATETIME:
                 if isinstance(input, datetime.datetime):
                     return input
                 else:
-                    return datetime.datetime.strptime(input[0:10], '%Y-%m-%d') # 2017-09-18T18:53:00.000Z
+                    return datetime.datetime.strptime(input[0:19], '%Y-%m-%dT%H:%M:%S') # 2017-10-01T10:01:00.479+0300
             else:
                 return NotImplementedError('Not supported type - {}'.format(type))
         except Exception as e:

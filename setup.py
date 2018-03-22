@@ -2,7 +2,7 @@ from distutils.core import setup
 from setuptools import find_packages
 
 setup(name='na3x',
-      version='0.1.4',
+      version='0.1.5',
       description='na3x data transformation and integration framework',
       author='Roman Yepifanov',
       url='https://github.com/yero13/na3x',
