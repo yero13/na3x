@@ -503,3 +503,28 @@ def rename_fields(input, **params):
             row.pop(rename[RENAME_SRC_FIELD])
     return input
 
+
+@transformer
+def list_concat(input, **params):
+    """
+    Concatenates two or more lists and put result into dest field
+    :param input:
+    :param params:
+    :return:
+    """
+    import logging
+
+
+    PARAM_SOURCE_FIELDS = 'src.fields'
+    PARAM_DEST_FIELD = 'dest.field'
+
+    field_list = params.get(PARAM_SOURCE_FIELDS)
+    logging.debug('0: {}'.format(field_list))
+    for row in input:
+        res = []
+        for field in field_list:
+            logging.debug('1: {}'.format(field))
+            res += row[field]
+            logging.debug('2: {}'.format(res))
+        row[params.get(PARAM_DEST_FIELD)] = res
+    return input
